@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using SubirVentas.Models;
-using System.Linq;
-using System.Net;
 
 namespace SubirVentas
 {
@@ -41,7 +39,7 @@ namespace SubirVentas
                 await using var contextHostingMatriz = factory.CreateDbContext(new string[] { mysqlremotoMatriz });
                 await using var contextHosting = factory.CreateDbContext(new string[] { mysqlremoto });
                 await using var contextHostingUpdate = factory.CreateDbContext(new string[] { mysqlremoto });
-                await ActualizaInventario(location, contextLocal, contextHostingMatriz);
+                await ActualizaInventario(location, contextLocal, contextHostingMatriz, contextHosting);
 
                 await contextHosting.STOCKCURRENT.ExecuteDeleteAsync();
                 await contextHosting.PRODUCTS.ExecuteDeleteAsync();
@@ -67,8 +65,8 @@ namespace SubirVentas
                 var missingProductsCat = ProductsCatLocal.Except(ProductsCatHosting).ToList();
 
                 var StockDiaryLocal = await contextLocal.STOCKDIARY.AsNoTracking().ToListAsync();
-                var StockDiaryHosting = await contextHosting.STOCKDIARY.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
-                var missingStockDiary = StockDiaryHosting.Except(StockDiaryLocal).ToList();
+                var StockDiaryHosting = await contextHosting.STOCKDIARY.AsNoTracking().ToListAsync();
+                var missingStockDiary = StockDiaryLocal.Except(StockDiaryHosting).ToList();
 
                 var ClosedCashLocal = await contextLocal.CLOSEDCASH.AsNoTracking().ToListAsync();
                 var ClosedCashHosting = await contextHosting.CLOSEDCASH.AsNoTracking().ToListAsync();
@@ -179,15 +177,12 @@ namespace SubirVentas
             var missingStockDiaryTemp = StockDiaryHostingTemp.Except(StockDiaryLocalTemp).ToList();
 
             var StockDiaryLocal = await contextLocal.STOCKDIARY.AsNoTracking().ToListAsync();
-            var StockDiaryHosting = await contextHostingMatriz.STOCKDIARY.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
+            var StockDiaryHosting = await contextHosting.STOCKDIARY.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
             var missingStockDiary = StockDiaryHosting.Except(StockDiaryLocal).ToList();
 
             await AddRangeIfAnyAsync(contextLocal.STOCKDIARYTEMP, missingStockDiaryTemp);
             await AddRangeIfAnyAsync(contextLocal.STOCKDIARY, missingStockDiary);
-            /*foreach (var item in missingStockDiaryTemp)
-            {
-                await contextLocal.STOCKDIARY.AddAsync(new STOCKDIARY { ACTIVECASH = item.ACTIVECASH, DATENEW = item.DATENEW, FOLIO = item.FOLIO, ID = item.ID, LOCATION = "0",PRICE=item.PRICE, PRODUCT=item.PRODUCT, PROVEEDOR = item.PROVEEDOR, REASON = item.REASON, UNITS = item.UNITS });
-            }*/
+
             if (contextLocal.ChangeTracker.HasChanges())
                 await contextLocal.SaveChangesAsync();
             contextHosting.STOCKDIARYTEMP.RemoveRange(StockDiaryHostingTemp);
