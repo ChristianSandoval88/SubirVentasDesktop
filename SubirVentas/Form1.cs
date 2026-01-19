@@ -37,6 +37,10 @@ namespace SubirVentas
                 await using var contextHosting = factory.CreateDbContext(new string[] { mysqlremoto });
                 await using var contextHostingUpdate = factory.CreateDbContext(new string[] { mysqlremoto });
 
+                var CustomersLocal = await contextLocal.CUSTOMERS.AsNoTracking().ToListAsync();
+                var CustomersHosting = await contextHosting.CUSTOMERS.AsNoTracking().ToListAsync();
+                var missingCustomers = CustomersLocal.Except(CustomersHosting).ToList();
+
                 var CategoriesLocal = await contextLocal.CATEGORIES.AsNoTracking().ToListAsync();
                 var CategoriesHosting = await contextHosting.CATEGORIES.AsNoTracking().ToListAsync();
                 var missingCategories = CategoriesLocal.Except(CategoriesHosting).ToList();
@@ -89,6 +93,7 @@ namespace SubirVentas
                 var TicketsHosting = await contextHosting.TICKETS.AsNoTracking().ToListAsync();
                 var missingTickets = TicketsLocal.Except(TicketsHosting).ToList();
 
+                await AddRangeIfAnyAsync(contextHosting.CUSTOMERS, missingCustomers);
                 await AddRangeIfAnyAsync(contextHosting.CATEGORIES, missingCategories);
                 await AddRangeIfAnyAsync(contextHosting.PRODUCTS, missingProducts);
                 await AddRangeIfAnyAsync(contextHosting.PRODUCTS_CAT, missingProductsCat);
@@ -106,6 +111,7 @@ namespace SubirVentas
                 if (contextHosting.ChangeTracker.HasChanges())
                     await contextHosting.SaveChangesAsync();
 
+                contextHostingUpdate.CUSTOMERS.UpdateRange(CustomersLocal);
                 contextHostingUpdate.CATEGORIES.UpdateRange(CategoriesLocal);
                 contextHostingUpdate.PRODUCTS.UpdateRange(ProductsLocal);
                 contextHostingUpdate.PRODUCTS_CAT.UpdateRange(ProductsCatLocal);

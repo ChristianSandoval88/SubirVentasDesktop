@@ -24,7 +24,7 @@
         public string? NOTES { get; set; }
         public bool VISIBLE { get; set; }
         public DateTime? CURDATE { get; set; }
-        public DateTime? CURDEBT { get; set; }
+        public double? CURDEBT { get; set; }
         public bool Equals(CUSTOMERS other)
         {
             if (other is null)
