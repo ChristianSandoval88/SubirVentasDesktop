@@ -14,6 +14,10 @@
         public decimal? PRICESELL4 { get; set; }*/
         public string? CATEGORY { get; set; }
         public string? TAXCAT { get; set; }
+        public bool IVA16 { get; set; }
+        public bool IVA0 { get; set; }
+        public bool IVAEXCENTO { get; set; }
+        public bool IEPS8 { get; set; }
         public bool Equals(PRODUCTS other)
         {
             if (other is null)
