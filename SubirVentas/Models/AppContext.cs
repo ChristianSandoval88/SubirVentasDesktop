@@ -20,7 +20,6 @@ namespace SubirVentas.Models
         public DbSet<ROLES> ROLES { get; set; }
         public DbSet<STOCKCURRENT> STOCKCURRENT { get; set; }
         public DbSet<STOCKDIARY> STOCKDIARY { get; set; }
-        public DbSet<STOCKDIARYTEMP> STOCKDIARYTEMP { get; set; }
         public DbSet<TICKETLINES> TICKETLINES { get; set; }
         public DbSet<TICKETS> TICKETS { get; set; }
         public DbSet<APPLICATIONS> APPLICATIONS { get; set; }
