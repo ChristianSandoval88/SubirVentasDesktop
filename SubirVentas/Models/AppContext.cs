@@ -11,7 +11,6 @@ namespace SubirVentas.Models
         public DbSet<PAYMENTS> PAYMENTS { get; set; }
         public DbSet<CATEGORIES> CATEGORIES { get; set; }
         public DbSet<CLOSEDCASH> CLOSEDCASH { get; set; }
-        public DbSet<CUSTOMERS> CUSTOMERS { get; set; }
         public DbSet<LOCATIONS> LOCATIONS { get; set; }
         public DbSet<PEOPLE> PEOPLE { get; set; }
         public DbSet<PRODUCTS> PRODUCTS { get; set; }

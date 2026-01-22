@@ -6,7 +6,6 @@
         public string? RECEIPT { get; set; }
         public string? PAYMENT { get; set; }
         public decimal? TOTAL { get; set; }
-        public string? NOTES { get; set; }
         public bool Equals(PAYMENTS other)
         {
             if (other is null)

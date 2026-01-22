@@ -10,7 +10,6 @@ namespace SubirVentas.Models
         public int? HOSTSEQUENCE { get; set; }
         public DateTime? DATESTART { get; set; }
         public DateTime? DATEEND { get; set; }
-        public string? ACTIVECASH { get; set; }
         public bool Equals(CLOSEDCASH other)
         {
             if (other is null)

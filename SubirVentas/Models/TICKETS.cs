@@ -9,7 +9,6 @@
         public string? CUSTOMER { get; set; }
         public int? STATUS { get; set; }
         public decimal? TOTAL { get; set; }
-        public string? ACTIVECASH { get; set; }
         public bool Equals(TICKETS other)
         {
             if (other is null)

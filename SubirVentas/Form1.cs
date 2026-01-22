@@ -32,10 +32,20 @@ namespace SubirVentas
                 var factory = new AppDbContextFactory();
                 var mysqllocal = Environment.GetEnvironmentVariable("mysqllocal", EnvironmentVariableTarget.Machine);
                 var mysqlremoto = Environment.GetEnvironmentVariable("mysqlremoto", EnvironmentVariableTarget.Machine);
+                var mysqlremotoMatriz = Environment.GetEnvironmentVariable("mysqlremotomatriz", EnvironmentVariableTarget.Machine);
 
                 await using var contextLocal = factory.CreateDbContext(new string[] { mysqllocal });
                 await using var contextHosting = factory.CreateDbContext(new string[] { mysqlremoto });
                 await using var contextHostingUpdate = factory.CreateDbContext(new string[] { mysqlremoto });
+                await using var contextHostingMatriz = factory.CreateDbContext(new string[] { mysqlremotoMatriz });
+                await ActualizaInventario(location, contextLocal, contextHostingMatriz, contextHosting);
+
+                await contextHosting.STOCKCURRENT.ExecuteDeleteAsync();
+                await contextHosting.PRODUCTS.ExecuteDeleteAsync();
+                await contextHosting.PRODUCTS_CAT.ExecuteDeleteAsync();
+                await contextHosting.CATEGORIES.ExecuteDeleteAsync();
+                if (contextHosting.ChangeTracker.HasChanges())
+                    await contextHosting.SaveChangesAsync();
 
                 //var CustomersLocal = await contextLocal.CUSTOMERS.AsNoTracking().ToListAsync();
                 //var CustomersHosting = await contextHosting.CUSTOMERS.AsNoTracking().ToListAsync();
@@ -130,5 +140,66 @@ namespace SubirVentas
                 MessageBox.Show("No se pudo sincronizar la información, revise su conexión de internet: " + e.Message);
             }
         }
+
+        private static async Task ActualizaInventario(string? location, Models.AppContext contextLocal, Models.AppContext contextHosting, Models.AppContext contextHostingMatriz)
+        {
+            await contextLocal.PRODUCTS.ExecuteDeleteAsync();
+            await contextLocal.CATEGORIES.ExecuteDeleteAsync();
+            await contextLocal.PRODUCTS_CAT.ExecuteDeleteAsync();
+            if (contextLocal.ChangeTracker.HasChanges())
+                await contextLocal.SaveChangesAsync();
+
+            var ProductsLocal = await contextLocal.PRODUCTS.AsNoTracking().ToListAsync();
+            var ProductsHosting = await contextHosting.PRODUCTS.AsNoTracking().ToListAsync();
+            var missingProducts = ProductsHosting.Except(ProductsLocal).ToList();
+
+            var CategoriesLocal = await contextLocal.CATEGORIES.AsNoTracking().ToListAsync();
+            var CategoriesHosting = await contextHosting.CATEGORIES.AsNoTracking().ToListAsync();
+            var missingCategories = CategoriesHosting.Except(CategoriesLocal).ToList();
+
+            var ProductsCatLocal = await contextLocal.PRODUCTS_CAT.AsNoTracking().ToListAsync();
+            var ProductsCatHosting = await contextHosting.PRODUCTS_CAT.AsNoTracking().ToListAsync();
+            var missingProductsCat = ProductsCatHosting.Except(ProductsCatLocal).ToList();
+
+            await AddRangeIfAnyAsync(contextLocal.PRODUCTS, missingProducts);
+            await AddRangeIfAnyAsync(contextLocal.CATEGORIES, missingCategories);
+            await AddRangeIfAnyAsync(contextLocal.PRODUCTS_CAT, missingProductsCat);
+            if (contextLocal.ChangeTracker.HasChanges())
+                await contextLocal.SaveChangesAsync();
+
+            foreach (var item in missingProducts)
+            {
+                var product = contextLocal.STOCKCURRENT.FirstOrDefault(x => x.PRODUCT == item.ID);
+                if (product is null)
+                    contextLocal.STOCKCURRENT.Add(new STOCKCURRENT { PRODUCT = item.ID, UNITS = 0, LOCATION = "0" });
+            }
+            if (contextLocal.ChangeTracker.HasChanges())
+                await contextLocal.SaveChangesAsync();
+
+            var StockDiaryLocal = await contextLocal.STOCKDIARY.AsNoTracking().ToListAsync();
+            var StockDiaryHosting = await contextHosting.STOCKDIARY.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
+            var missingStockDiary = StockDiaryHosting.Except(StockDiaryLocal).ToList();
+
+            await AddRangeIfAnyAsync(contextLocal.STOCKDIARY, missingStockDiary);
+
+            if (contextLocal.ChangeTracker.HasChanges())
+                await contextLocal.SaveChangesAsync();
+
+            var stock = await contextLocal.STOCKCURRENT.ToListAsync();
+            foreach (var item in missingStockDiary)
+            {
+                var product = stock.FirstOrDefault(x => x.PRODUCT == item.PRODUCT);
+                if (product is not null)
+                {
+                    product.UNITS = item.REASON > 0 ? product.UNITS += item.UNITS : product.UNITS -= item.UNITS;
+                }
+            }
+
+            if (contextLocal.ChangeTracker.HasChanges())
+                await contextLocal.SaveChangesAsync();
+            if (contextHosting.ChangeTracker.HasChanges())
+                await contextHosting.SaveChangesAsync();
+        }
     }
+}
 }

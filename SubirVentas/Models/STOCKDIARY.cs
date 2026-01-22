@@ -9,7 +9,6 @@
         public string? PRODUCT { get; set; }
         public decimal? UNITS { get; set; }
         public decimal? PRICE { get; set; }
-        public string? ACTIVECASH { get; set; }
         public bool Equals(STOCKDIARY other)
         {
             if (other is null)
