@@ -192,7 +192,8 @@ namespace SubirVentas
                 var product = stock.FirstOrDefault(x => x.PRODUCT == item.PRODUCT);
                 if (product is not null)
                 {
-                    product.UNITS = item.REASON > 0 ? product.UNITS += item.UNITS : product.UNITS -= item.UNITS;
+                    //product.UNITS = item.REASON > 0 ? product.UNITS += item.UNITS : product.UNITS -= item.UNITS;
+                    product.UNITS += item.UNITS;
                 }
             }
 
