@@ -30,6 +30,7 @@ namespace SubirVentas
             try
             {
                 var factory = new AppDbContextFactory();
+                var location = Environment.GetEnvironmentVariable("location", EnvironmentVariableTarget.Machine);
                 var mysqllocal = Environment.GetEnvironmentVariable("mysqllocal", EnvironmentVariableTarget.Machine);
                 var mysqlremoto = Environment.GetEnvironmentVariable("mysqlremoto", EnvironmentVariableTarget.Machine);
                 var mysqlremotoMatriz = Environment.GetEnvironmentVariable("mysqlremotomatriz", EnvironmentVariableTarget.Machine);
@@ -201,5 +202,4 @@ namespace SubirVentas
                 await contextHosting.SaveChangesAsync();
         }
     }
-}
 }

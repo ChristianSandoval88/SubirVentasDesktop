@@ -8,7 +8,6 @@
         public string? PERSON { get; set; }
         public string? CUSTOMER { get; set; }
         public int? STATUS { get; set; }
-        public decimal? TOTAL { get; set; }
         public bool Equals(TICKETS other)
         {
             if (other is null)
