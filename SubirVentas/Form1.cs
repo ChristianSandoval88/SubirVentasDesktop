@@ -113,11 +113,14 @@ namespace SubirVentas
 
                 contextHostingUpdate.CUSTOMERS.UpdateRange(CustomersLocal);
                 contextHostingUpdate.CATEGORIES.UpdateRange(CategoriesLocal);
+                
                 contextHostingUpdate.PRODUCTS.UpdateRange(ProductsLocal);
                 contextHostingUpdate.PRODUCTS_CAT.UpdateRange(ProductsCatLocal);
                 contextHostingUpdate.PEOPLE.UpdateRange(PeopleLocal);
                 contextHostingUpdate.LOCATIONS.UpdateRange(LocationsLocal);
                 contextHostingUpdate.ROLES.UpdateRange(RolesLocal);
+                contextHostingUpdate.STOCKCURRENT.UpdateRange(StockCurrentLocal);
+                contextHostingUpdate.STOCKDIARY.UpdateRange(StockDiaryLocal);
                 contextHostingUpdate.APPLICATIONS.Update(new APPLICATIONS { ID = "openbravopos", FECHA = DateTime.Now });
 
                 if (contextHostingUpdate.ChangeTracker.HasChanges())
