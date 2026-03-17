@@ -39,7 +39,7 @@ namespace SubirVentas
                 await using var contextHosting = factory.CreateDbContext(new string[] { mysqlremoto });
                 await using var contextHostingUpdate = factory.CreateDbContext(new string[] { mysqlremoto });
                 await using var contextHostingMatriz = factory.CreateDbContext(new string[] { mysqlremotoMatriz });
-                await ActualizaInventario(location, contextLocal, contextHostingMatriz, contextHosting);
+                await ActualizaInventario(location, contextLocal, contextHostingMatriz);
 
                 await contextHosting.STOCKCURRENT.ExecuteDeleteAsync();
                 await contextHosting.PRODUCTS.ExecuteDeleteAsync();
@@ -142,7 +142,7 @@ namespace SubirVentas
             }
         }
 
-        private static async Task ActualizaInventario(string? location, Models.AppContext contextLocal, Models.AppContext contextHosting, Models.AppContext contextHostingMatriz)
+        private static async Task ActualizaInventario(string? location, Models.AppContext contextLocal, Models.AppContext contextHosting)
         {
             await contextLocal.PRODUCTS.ExecuteDeleteAsync();
             await contextLocal.CATEGORIES.ExecuteDeleteAsync();
@@ -178,7 +178,7 @@ namespace SubirVentas
                 await contextLocal.SaveChangesAsync();
 
             var StockDiaryLocal = await contextLocal.STOCKDIARY.AsNoTracking().ToListAsync();
-            var StockDiaryHosting = await contextHostingMatriz.STOCKDIARY.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
+            var StockDiaryHosting = await contextHosting.STOCKDIARY.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
             var missingStockDiary = StockDiaryHosting.Except(StockDiaryLocal).ToList();
 
             await AddRangeIfAnyAsync(contextLocal.STOCKDIARY, missingStockDiary);
