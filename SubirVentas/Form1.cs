@@ -178,7 +178,7 @@ namespace SubirVentas
                 await contextLocal.SaveChangesAsync();
 
             var StockDiaryLocal = await contextLocal.STOCKDIARY.AsNoTracking().ToListAsync();
-            var StockDiaryHosting = await contextHosting.STOCKDIARY.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
+            var StockDiaryHosting = await contextHostingMatriz.STOCKDIARY.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
             var missingStockDiary = StockDiaryHosting.Except(StockDiaryLocal).ToList();
 
             await AddRangeIfAnyAsync(contextLocal.STOCKDIARY, missingStockDiary);
