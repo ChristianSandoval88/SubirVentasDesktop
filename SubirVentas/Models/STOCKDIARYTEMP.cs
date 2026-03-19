@@ -12,6 +12,8 @@
         public string? ACTIVECASH { get; set; }
         public string? PROVEEDOR { get; set; }
         public string? FOLIO { get; set; }
+        public string? SEMANA { get; set; }
+        public string? USUARIO { get; set; }
         public bool Equals(STOCKDIARYTEMP other)
         {
             if (other is null)
