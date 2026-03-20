@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SubirVentas.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace SubirVentas
 {
@@ -138,7 +139,7 @@ namespace SubirVentas
             }
             catch (Exception e)
             {
-                MessageBox.Show("No se pudo sincronizar la información, revise su conexión de internet: " + e.Message);
+                MessageBox.Show("No se pudo sincronizar la información, revise su conexión de internet: " + e.InnerException);
             }
         }
 
@@ -172,7 +173,7 @@ namespace SubirVentas
             {
                 var product = contextLocal.STOCKCURRENT.FirstOrDefault(x => x.PRODUCT == item.ID);
                 if (product is null)
-                    contextLocal.STOCKCURRENT.Add(new STOCKCURRENT { PRODUCT = item.ID, UNITS = 0, LOCATION = "0" });
+                    contextLocal.STOCKCURRENT.Add(new STOCKCURRENT { PRODUCT = item.ID, UNITS = 0, LOCATION = location });
             }
             if (contextLocal.ChangeTracker.HasChanges())
                 await contextLocal.SaveChangesAsync();
@@ -181,19 +182,24 @@ namespace SubirVentas
             var StockDiaryHosting = await contextHosting.STOCKDIARY.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
             var missingStockDiary = StockDiaryHosting.Except(StockDiaryLocal).ToList();
 
+            var StockDiaryLocalTemp = await contextLocal.STOCKDIARYTEMP.AsNoTracking().ToListAsync();
+            var StockDiaryHostingTemp = await contextHosting.STOCKDIARYTEMP.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
+            var missingStockDiaryTemp = StockDiaryHostingTemp.Except(StockDiaryLocalTemp).ToList();
             await AddRangeIfAnyAsync(contextLocal.STOCKDIARY, missingStockDiary);
+            await AddRangeIfAnyAsync(contextLocal.STOCKDIARYTEMP, missingStockDiaryTemp);
 
             if (contextLocal.ChangeTracker.HasChanges())
                 await contextLocal.SaveChangesAsync();
 
+            contextHosting.STOCKDIARYTEMP.RemoveRange(StockDiaryHostingTemp);
+            await contextLocal.STOCKDIARYTEMP.ExecuteDeleteAsync();
             var stock = await contextLocal.STOCKCURRENT.ToListAsync();
-            foreach (var item in missingStockDiary)
+            foreach (var item in missingStockDiaryTemp)
             {
-                var product = stock.FirstOrDefault(x => x.PRODUCT == item.PRODUCT);
+                var product = stock.FirstOrDefault(x => x.PRODUCT.ToLower().Trim() == item.PRODUCT.ToLower().Trim());
                 if (product is not null)
                 {
-                    //product.UNITS = item.REASON > 0 ? product.UNITS += item.UNITS : product.UNITS -= item.UNITS;
-                    product.UNITS += item.UNITS;
+                    contextLocal.STOCKCURRENT.First(x => x.PRODUCT.ToLower().Trim() == item.PRODUCT.ToLower().Trim()).UNITS += item.UNITS;
                 }
             }
 
