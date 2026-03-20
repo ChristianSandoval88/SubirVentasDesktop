@@ -101,6 +101,8 @@
 #endregion
         public string? CATEGORY { get; set; }   
         public string? TAXCAT { get; set; }
+        public bool? ISCOM { get; set; }
+        public bool? ISSCALE { get; set; }
         public bool Equals(PRODUCTS other)
         {
             if (other is null)
