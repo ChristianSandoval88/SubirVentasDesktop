@@ -167,7 +167,7 @@ public partial class Form1 : Form
         {
             var product = contextLocal.STOCKCURRENT.FirstOrDefault(x => x.PRODUCT == item.ID);
             if (product is null)
-                contextLocal.STOCKCURRENT.Add(new STOCKCURRENT { PRODUCT = item.ID, UNITS = 0, LOCATION = "0" });
+                contextLocal.STOCKCURRENT.Add(new STOCKCURRENT { PRODUCT = item.ID, UNITS = 0, LOCATION = location });
         }
         if (contextLocal.ChangeTracker.HasChanges())
             await contextLocal.SaveChangesAsync();
@@ -180,7 +180,6 @@ public partial class Form1 : Form
         var StockDiaryHosting = await contextHosting.STOCKDIARY.Where(x => x.LOCATION == location).AsNoTracking().ToListAsync();
         var missingStockDiary = StockDiaryHosting.Except(StockDiaryLocal).ToList();
 
-        missingStockDiary.ForEach(x => x.LOCATION = "0");
         await AddRangeIfAnyAsync(contextLocal.STOCKDIARYTEMP, missingStockDiaryTemp);
         await AddRangeIfAnyAsync(contextLocal.STOCKDIARY, missingStockDiary);
 
@@ -192,7 +191,7 @@ public partial class Form1 : Form
         var stock = await contextLocal.STOCKCURRENT.ToListAsync();
         foreach (var item in missingStockDiaryTemp)
         {
-            var product = stock.FirstOrDefault(x => x.PRODUCT == item.PRODUCT);
+            var product = stock.FirstOrDefault(x => x.PRODUCT.ToLower().Trim() == item.PRODUCT.ToLower().Trim());
             if (product is not null)
             {
                 //product.UNITS = item.REASON > 0 ? product.UNITS += item.UNITS : product.UNITS -= item.UNITS;
