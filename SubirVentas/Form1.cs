@@ -139,7 +139,7 @@ namespace SubirVentas
             }
             catch (Exception e)
             {
-                MessageBox.Show("No se pudo sincronizar la información, revise su conexión de internet: " + e.InnerException);
+                MessageBox.Show("No se pudo sincronizar la información, revise su conexión de internet: " + e.Message);
             }
         }
 
